@@ -9,7 +9,7 @@ import logging
 
 from app.config import get_settings
 from app.database import create_db_and_tables
-from app.api.routes import health, admin, gateway
+from app.api.routes import health, admin, gateway, auth
 
 # Import models to ensure they're registered with SQLModel
 from app.models.partner import Partner
@@ -39,12 +39,16 @@ app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="API Gateway for managing external partner access to internal services",
-    lifespan=lifespan
+    lifespan=lifespan,
+    swagger_ui_parameters={
+        "persistAuthorization": True  # Keep authorization after page refresh
+    }
 )
 
 
 # Include routers
 app.include_router(health.router)
+app.include_router(auth.router)
 app.include_router(admin.router)
 app.include_router(gateway.router)
 

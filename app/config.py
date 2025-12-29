@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # Backend Service URL
     backend_base_url: str = "https://jsonplaceholder.typicode.com"
 
+    # JWT Settings
+    jwt_secret_key: str = "your-secret-key-change-this-in-production"
+    jwt_algorithm: str = "HS256"
+    jwt_access_token_expire_minutes: int = 60  # 1 hour
+
     # Rate Limiting Defaults
     default_rate_limit: int = 60  # requests per window
     rate_limit_window: int = 60  # seconds

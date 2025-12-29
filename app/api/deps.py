@@ -3,7 +3,10 @@ API Dependencies - Authentication, Rate Limiting, etc.
 """
 from typing import Annotated
 from fastapi import Depends, HTTPException, Header, Request, status
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel.ext.asyncio.session import AsyncSession
+import jwt
+from jwt.exceptions import PyJWTError
 
 from app.database import get_session
 from app.models.partner import Partner
@@ -12,6 +15,9 @@ from app.services.rate_limit import RateLimiterService
 from app.config import get_settings
 
 settings = get_settings()
+
+# Security scheme for Bearer token authentication (enables Swagger UI Authorize button)
+security = HTTPBearer()
 
 
 def get_api_key(
@@ -36,6 +42,71 @@ def get_api_key(
     )
 
 
+def get_token_from_header(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(security)]
+) -> str:
+    """Extract JWT token from Authorization header using HTTPBearer"""
+    return credentials.credentials
+
+
+async def verify_jwt_token(
+    token: str,
+    session: AsyncSession
+) -> Partner:
+    """Verify JWT token and return partner"""
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail={
+            "error": "Unauthorized",
+            "message": "Could not validate credentials"
+        },
+        headers={"WWW-Authenticate": "Bearer"}
+    )
+    
+    try:
+        # Decode JWT token
+        payload = jwt.decode(
+            token,
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm]
+        )
+        
+        partner_id: int = payload.get("partner_id")
+        if partner_id is None:
+            raise credentials_exception
+        
+        # Get partner from database
+        partner_service = PartnerService(session)
+        partner = await partner_service.get_partner_by_id(partner_id)
+        
+        if partner is None:
+            raise credentials_exception
+        
+        if not partner.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail={
+                    "error": "Unauthorized",
+                    "message": "Partner account has been deactivated"
+                }
+            )
+        
+        # Populate allowed services from token (faster than DB lookup)
+        partner.allowed_services = payload.get("allowed_services", [])
+        
+        return partner
+        
+    except PyJWTError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail={
+                "error": "Unauthorized",
+                "message": f"Invalid token: {str(e)}"
+            },
+            headers={"WWW-Authenticate": "Bearer"}
+        ) from e
+
+
 def get_service_from_path(path: str) -> str:
     """Extract service name from request path"""
     # Remove leading slash and get first segment
@@ -47,7 +118,7 @@ def get_service_from_path(path: str) -> str:
 
 class AuthenticatedPartner:
     """
-    Dependency that handles authentication, authorization, and rate limiting
+    Dependency that handles JWT authentication, authorization, and rate limiting
     """
     
     def __init__(self, check_service_access: bool = True):
@@ -56,30 +127,11 @@ class AuthenticatedPartner:
     async def __call__(
         self,
         request: Request,
-        api_key: Annotated[str, Depends(get_api_key)],
+        token: Annotated[str, Depends(get_token_from_header)],
         session: Annotated[AsyncSession, Depends(get_session)]
     ) -> Partner:
-        # Authenticate partner
-        partner_service = PartnerService(session)
-        partner = await partner_service.get_partner_by_api_key(api_key)
-        
-        if not partner:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={
-                    "error": "Unauthorized",
-                    "message": "Invalid API key"
-                }
-            )
-        
-        if not partner.is_active:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail={
-                    "error": "Unauthorized",
-                    "message": "API key has been deactivated"
-                }
-            )
+        # Verify JWT and get partner
+        partner = await verify_jwt_token(token, session)
         
         # Check service access
         if self.check_service_access:
