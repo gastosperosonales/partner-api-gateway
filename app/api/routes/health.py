@@ -1,7 +1,7 @@
 """
 Health & Info Routes - Public endpoints (no auth required)
 """
-from typing import Dict, Any, List
+from typing import Dict, Any
 from fastapi import APIRouter
 
 from app.config import get_settings
