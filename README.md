@@ -256,6 +256,23 @@ curl http://localhost:8080/admin/logs?limit=10 | python3 -m json.tool
 - **SQLite** - Persistent database (`api_gateway.db`)
 - **httpx** - Async HTTP client for proxying
 
+## Architectural Considerations
+
+### Current Implementation: Database-Backed Authentication
+
+**Request Flow:**
+1. Extract API key from headers
+2. Database lookup: Partner + permissions + rate limit (2-3 queries)
+3. Proxy to backend service
+4. Log to audit table
+
+*Limitations:*
+- Database I/O overhead: 2-3 queries per request
+- Latency: 30-50ms per request
+- Throughput: ~500 req/sec (single instance)
+- Scaling bottleneck at high traffic
+
+
 ## Project Structure
 
 ```
