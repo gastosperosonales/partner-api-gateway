@@ -1,7 +1,8 @@
 """
 Partner Service - Business logic for partner management
 """
-from typing import Optional, List
+from typing import Optional, List, Tuple
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select
 from app.models.partner import Partner, PartnerCreate, PartnerUpdate
@@ -14,10 +15,12 @@ class PartnerService:
     def __init__(self, session: AsyncSession):
         self.session = session
     
-    async def create_partner(self, partner_data: PartnerCreate) -> tuple[Partner, str]:
+    async def create_partner(self, partner_data: PartnerCreate) -> Tuple[Partner, str]:
         """
         Create a new partner with API key and service permissions
         Returns: (partner, api_key) - API key is only returned once
+        Raises:
+            HTTPException: If partner creation fails
         """
         api_key = Partner.generate_api_key()
         api_key_hash = Partner.hash_api_key(api_key)
@@ -116,11 +119,18 @@ class PartnerService:
         result = await self.session.execute(statement)
         return list(result.scalars().all())
     
-    async def update_partner(self, partner_id: int, partner_data: PartnerUpdate) -> Optional[Partner]:
-        """Update a partner"""
+    async def update_partner(self, partner_id: int, partner_data: PartnerUpdate) -> Partner:
+        """Update a partner
+        
+        Raises:
+            HTTPException: If partner not found
+        """
         partner = await self.session.get(Partner, partner_id)
         if not partner:
-            return None
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "Not Found", "message": f"Partner with ID {partner_id} not found"}
+            )
         
         update_data = partner_data.model_dump(exclude_unset=True)
         for key, value in update_data.items():
@@ -135,23 +145,37 @@ class PartnerService:
         
         return partner
     
-    async def deactivate_partner(self, partner_id: int) -> bool:
-        """Deactivate a partner"""
+    async def deactivate_partner(self, partner_id: int) -> Partner:
+        """Deactivate a partner
+        
+        Raises:
+            HTTPException: If partner not found
+        """
         partner = await self.session.get(Partner, partner_id)
         if not partner:
-            return False
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "Not Found", "message": f"Partner with ID {partner_id} not found"}
+            )
         
         partner.is_active = False
         self.session.add(partner)
         await self.session.commit()
         
-        return True
+        return partner
     
-    async def regenerate_api_key(self, partner_id: int) -> Optional[str]:
-        """Regenerate API key for a partner"""
+    async def regenerate_api_key(self, partner_id: int) -> str:
+        """Regenerate API key for a partner
+        
+        Raises:
+            HTTPException: If partner not found
+        """
         partner = await self.session.get(Partner, partner_id)
         if not partner:
-            return None
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "Not Found", "message": f"Partner with ID {partner_id} not found"}
+            )
         
         new_api_key = Partner.generate_api_key()
         partner.api_key_hash = Partner.hash_api_key(new_api_key)
@@ -196,8 +220,12 @@ class PartnerService:
         
         return permission is not None
     
-    async def grant_service_access(self, partner_id: int, service_id: int) -> bool:
-        """Grant partner access to a service"""
+    async def grant_service_access(self, partner_id: int, service_id: int) -> PartnerServicePermission:
+        """Grant partner access to a service
+        
+        Raises:
+            HTTPException: If permission already exists
+        """
         # Check if permission already exists
         statement = select(PartnerServicePermission).where(
             PartnerServicePermission.partner_id == partner_id,
@@ -207,7 +235,10 @@ class PartnerService:
         existing = result.scalar_one_or_none()
         
         if existing:
-            return False
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"error": "Conflict", "message": "Permission already exists"}
+            )
         
         permission = PartnerServicePermission(
             partner_id=partner_id,
@@ -215,11 +246,16 @@ class PartnerService:
         )
         self.session.add(permission)
         await self.session.commit()
+        await self.session.refresh(permission)
         
-        return True
+        return permission
     
-    async def revoke_service_access(self, partner_id: int, service_id: int) -> bool:
-        """Revoke partner access to a service"""
+    async def revoke_service_access(self, partner_id: int, service_id: int) -> None:
+        """Revoke partner access to a service
+        
+        Raises:
+            HTTPException: If permission not found
+        """
         statement = select(PartnerServicePermission).where(
             PartnerServicePermission.partner_id == partner_id,
             PartnerServicePermission.service_id == service_id
@@ -228,9 +264,10 @@ class PartnerService:
         permission = result.scalar_one_or_none()
         
         if not permission:
-            return False
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "Not Found", "message": "Permission not found"}
+            )
         
         await self.session.delete(permission)
         await self.session.commit()
-        
-        return True

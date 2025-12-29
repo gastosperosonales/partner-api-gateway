@@ -3,6 +3,7 @@ API Gateway - FastAPI Application
 Main entry point
 """
 from contextlib import asynccontextmanager
+from typing import AsyncGenerator
 from fastapi import FastAPI
 import logging
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan - startup and shutdown events"""
     # Startup
     await create_db_and_tables()

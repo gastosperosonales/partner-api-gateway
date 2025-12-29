@@ -2,6 +2,7 @@
 Database Configuration
 SQLModel with SQLite (Async)
 """
+from typing import AsyncGenerator
 from sqlmodel import SQLModel
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -28,13 +29,13 @@ Async_Session = async_sessionmaker(
 )
 
 
-async def create_db_and_tables():
+async def create_db_and_tables() -> None:
     """Create all database tables"""
     async with engine.begin() as conn:
         await conn.run_sync(SQLModel.metadata.create_all)
 
 
-async def get_session():
+async def get_session() -> AsyncGenerator[AsyncSession, None]:
     """Dependency for getting async database sessions"""
     async with Async_Session() as session:
         yield session

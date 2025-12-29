@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     rate_limit_window: int = 60  # seconds
 
     # Available Services
-    available_services: list[str] = [
+    available_services: List[str] = [
         "users", "posts", "comments", "todos", "albums", "photos"
     ]
 

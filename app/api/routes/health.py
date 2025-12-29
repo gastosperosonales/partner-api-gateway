@@ -1,6 +1,7 @@
 """
 Health & Info Routes - Public endpoints (no auth required)
 """
+from typing import Dict, Any, List
 from fastapi import APIRouter
 
 from app.config import get_settings
@@ -10,7 +11,7 @@ settings = get_settings()
 
 
 @router.get("/")
-def index():
+def index() -> Dict[str, Any]:
     """Gateway info endpoint"""
     return {
         "service": settings.app_name,
@@ -21,6 +22,6 @@ def index():
 
 
 @router.get("/health")
-def health_check():
+def health_check() -> Dict[str, str]:
     """Health check endpoint"""
     return {"status": "healthy"}

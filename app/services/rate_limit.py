@@ -2,7 +2,7 @@
 Rate Limiter Service - Database-backed sliding window rate limiting
 """
 from datetime import datetime, timedelta
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlmodel import select, delete
 from app.models.rate_limit import RateLimitEntry
@@ -18,7 +18,7 @@ class RateLimiterService:
         self.session = session
         self.window_seconds = settings.rate_limit_window
     
-    async def _cleanup_old_entries(self, partner_id: int, cutoff: datetime):
+    async def _cleanup_old_entries(self, partner_id: int, cutoff: datetime) -> None:
         """Remove entries outside the current window"""
         statement = delete(RateLimitEntry).where(
             RateLimitEntry.partner_id == partner_id,
@@ -37,13 +37,13 @@ class RateLimiterService:
         results = result.scalars().all()
         return len(results)
     
-    async def _record_request(self, partner_id: int):
+    async def _record_request(self, partner_id: int) -> None:
         """Record a new request"""
         entry = RateLimitEntry(partner_id=partner_id)
         self.session.add(entry)
         await self.session.commit()
     
-    async def check_rate_limit(self, partner_id: int, limit: int) -> Tuple[bool, Dict]:
+    async def check_rate_limit(self, partner_id: int, limit: int) -> Tuple[bool, Dict[str, Any]]:
         """
         Check if partner is within rate limit
         
@@ -79,7 +79,7 @@ class RateLimiterService:
         
         return True, info
     
-    async def get_usage(self, partner_id: int, limit: int) -> Dict:
+    async def get_usage(self, partner_id: int, limit: int) -> Dict[str, Any]:
         """Get current usage stats for a partner"""
         current_time = datetime.utcnow()
         cutoff = current_time - timedelta(seconds=self.window_seconds)
@@ -93,7 +93,7 @@ class RateLimiterService:
             "window_seconds": self.window_seconds
         }
     
-    async def reset(self, partner_id: int):
+    async def reset(self, partner_id: int) -> None:
         """Reset rate limit for a partner"""
         statement = delete(RateLimitEntry).where(
             RateLimitEntry.partner_id == partner_id

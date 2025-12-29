@@ -3,7 +3,7 @@ Partner Model - Represents API partners/clients
 """
 from __future__ import annotations
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from sqlmodel import SQLModel, Field
 import hashlib
 import secrets
@@ -26,15 +26,15 @@ class Partner(PartnerBase, table=True):
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     
     # Cached allowed services - populated at runtime
-    _allowed_services: list[str] = []
+    _allowed_services: List[str] = []
     
     @property
-    def allowed_services(self) -> list[str]:
+    def allowed_services(self) -> List[str]:
         """Get list of allowed services (should be populated by service layer)"""
         return self._allowed_services
     
     @allowed_services.setter
-    def allowed_services(self, services: list[str]):
+    def allowed_services(self, services: List[str]) -> None:
         """Set allowed services"""
         self._allowed_services = services
     
@@ -61,13 +61,13 @@ class PartnerCreate(SQLModel):
     """Schema for creating a partner"""
     name: str
     rate_limit: int = 60
-    service_ids: list[int] = Field(default_factory=list)  # Services to grant access to
+    service_ids: List[int] = Field(default_factory=list)  # Services to grant access to
 
 
 class PartnerRead(PartnerBase):
     """Schema for reading a partner (public data)"""
     id: int
-    allowed_services: list[str] = Field(default_factory=list)
+    allowed_services: List[str] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
 
@@ -80,13 +80,11 @@ class PartnerReadWithKey(PartnerRead):
 class PartnerUpdate(SQLModel):
     """Schema for updating a partner"""
     name: Optional[str] = None
-    allowed_services: Optional[list[str]] = None
-    rate_limit: Optional[int] = None
-    is_active: Optional[bool] = None
+    allowed_services: Optional[List[str]] = None
     rate_limit: Optional[int] = None
     is_active: Optional[bool] = None
 
 
 class PartnerWithServices(PartnerRead):
     """Schema for reading a partner with their allowed services"""
-    services: list[str] = Field(default_factory=list)
+    services: List[str] = Field(default_factory=list)

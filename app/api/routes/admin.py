@@ -1,7 +1,7 @@
 """
 Admin Routes - Partner management and analytics
 """
-from typing import Annotated, List
+from typing import Annotated, List, Dict, Any
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,7 +21,7 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 @router.get("/partners")
 async def list_partners(
     session: Annotated[AsyncSession, Depends(get_session)]
-):
+) -> List[dict]:
     """List all registered partners with their allowed services"""
     partner_service = PartnerService(session)
     return await partner_service.get_all_partners()
@@ -62,7 +62,7 @@ async def create_partner(
 async def get_analytics(
     session: Annotated[AsyncSession, Depends(get_session)],
     hours: int = Query(24, ge=1, le=720)
-):
+) -> Dict[str, Any]:
     """Get API usage analytics for the past N hours"""
     logger_service = RequestLoggerService(session)
     return await logger_service.get_analytics(hours=hours)
