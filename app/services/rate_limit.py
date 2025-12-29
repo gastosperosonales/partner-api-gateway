@@ -3,7 +3,7 @@ Rate Limiter Service - Database-backed sliding window rate limiting
 """
 from datetime import datetime, timedelta
 from typing import Tuple, Dict, Any
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, delete
 from app.models.rate_limit import RateLimitEntry
 from app.config import get_settings

@@ -5,7 +5,7 @@ import time
 from typing import Annotated, Optional
 import httpx
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
 from app.models.partner import Partner

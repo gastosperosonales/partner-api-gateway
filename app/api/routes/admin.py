@@ -3,7 +3,7 @@ Admin Routes - Partner management and analytics
 """
 from typing import Annotated, List, Dict, Any
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.database import get_session
 from app.models.partner import PartnerCreate, PartnerReadWithKey

@@ -4,7 +4,9 @@ SQLModel with SQLite (Async)
 """
 from typing import AsyncGenerator
 from sqlmodel import SQLModel
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 from app.config import get_settings
 
@@ -22,7 +24,7 @@ engine = create_async_engine(
 )
 
 # Create async session maker
-Async_Session = async_sessionmaker(
+Async_Session = sessionmaker(
     engine, 
     class_=AsyncSession, 
     expire_on_commit=False
