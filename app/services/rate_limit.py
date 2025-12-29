@@ -78,25 +78,3 @@ class RateLimiterService:
         info["used"] = request_count + 1
         
         return True, info
-    
-    async def get_usage(self, partner_id: int, limit: int) -> Dict[str, Any]:
-        """Get current usage stats for a partner"""
-        current_time = datetime.utcnow()
-        cutoff = current_time - timedelta(seconds=self.window_seconds)
-        
-        request_count = await self._count_requests(partner_id, cutoff)
-        
-        return {
-            "used": request_count,
-            "limit": limit,
-            "remaining": max(0, limit - request_count),
-            "window_seconds": self.window_seconds
-        }
-    
-    async def reset(self, partner_id: int) -> None:
-        """Reset rate limit for a partner"""
-        statement = delete(RateLimitEntry).where(
-            RateLimitEntry.partner_id == partner_id
-        )
-        await self.session.execute(statement)
-        await self.session.commit()

@@ -29,8 +29,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 60  # 1 hour
 
-    # Rate Limiting Defaults
-    default_rate_limit: int = 60  # requests per window
+    # Rate Limiting
     rate_limit_window: int = 60  # seconds
 
     # Available Services

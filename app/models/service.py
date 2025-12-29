@@ -31,18 +31,3 @@ class ServiceCreate(SQLModel):
     display_name: str
     description: Optional[str] = None
     base_url: str = "https://jsonplaceholder.typicode.com"
-
-
-class ServiceRead(ServiceBase):
-    """Schema for reading a service"""
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-
-class ServiceUpdate(SQLModel):
-    """Schema for updating a service"""
-    display_name: Optional[str] = None
-    description: Optional[str] = None
-    base_url: Optional[str] = None
-    is_active: Optional[bool] = None

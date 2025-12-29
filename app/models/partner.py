@@ -51,11 +51,6 @@ class Partner(PartnerBase, table=True):
     def generate_api_key() -> str:
         """Generate a new API key"""
         return f"ak_{secrets.token_urlsafe(32)}"
-    
-    def verify_api_key(self, api_key: str) -> bool:
-        """Verify if provided API key matches"""
-        return self.hash_api_key(api_key) == self.api_key_hash
-
 
 class PartnerCreate(SQLModel):
     """Schema for creating a partner"""
@@ -75,16 +70,3 @@ class PartnerRead(PartnerBase):
 class PartnerReadWithKey(PartnerRead):
     """Schema for reading a partner with API key (only shown once)"""
     api_key: str
-
-
-class PartnerUpdate(SQLModel):
-    """Schema for updating a partner"""
-    name: Optional[str] = None
-    allowed_services: Optional[List[str]] = None
-    rate_limit: Optional[int] = None
-    is_active: Optional[bool] = None
-
-
-class PartnerWithServices(PartnerRead):
-    """Schema for reading a partner with their allowed services"""
-    services: List[str] = Field(default_factory=list)

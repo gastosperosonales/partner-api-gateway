@@ -2,7 +2,7 @@
 Gateway Routes - Proxy requests to backend services
 """
 import time
-from typing import Annotated, Optional
+from typing import Annotated
 import httpx
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession

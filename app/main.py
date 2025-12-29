@@ -10,13 +10,7 @@ import logging
 from app.config import get_settings
 from app.database import create_db_and_tables
 from app.api.routes import health, admin, gateway, auth
-
-# Import models to ensure they're registered with SQLModel
-from app.models.partner import Partner
-from app.models.service import Service
-from app.models.permission import PartnerServicePermission
-from app.models.audit import RequestLog
-from app.models.rate_limit import RateLimitEntry
+import app.models  # Import models to ensure they're registered with SQLModel
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -40,9 +34,6 @@ app = FastAPI(
     version=settings.app_version,
     description="API Gateway for managing external partner access to internal services",
     lifespan=lifespan,
-    swagger_ui_parameters={
-        "persistAuthorization": True  # Keep authorization after page refresh
-    }
 )
 
 

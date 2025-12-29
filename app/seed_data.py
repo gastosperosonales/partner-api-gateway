@@ -80,7 +80,8 @@ async def seed_demo_partners():
             # Convert service names to IDs
             service_ids = [service_map[name] for name in p["service_names"] if name in service_map]
             
-            await partner_service.create_partner_with_key(
+            # Use unified create_partner with provided demo API key
+            _, created_key = await partner_service.create_partner(
                 PartnerCreate(
                     name=p["name"],
                     service_ids=service_ids,

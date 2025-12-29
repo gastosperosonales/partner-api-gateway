@@ -15,17 +15,3 @@ class PartnerServicePermission(SQLModel, table=True):
     partner_id: int = Field(foreign_key="partners.id", index=True)
     service_id: int = Field(foreign_key="services.id", index=True)
     granted_at: datetime = Field(default_factory=datetime.utcnow)
-
-
-class PartnerServicePermissionCreate(SQLModel):
-    """Schema for creating a permission"""
-    partner_id: int
-    service_id: int
-
-
-class PartnerServicePermissionRead(SQLModel):
-    """Schema for reading a permission"""
-    id: int
-    partner_id: int
-    service_id: int
-    granted_at: datetime
