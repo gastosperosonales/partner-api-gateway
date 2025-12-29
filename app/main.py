@@ -5,7 +5,7 @@ Main entry point
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI
-import logging
+from loguru import logger
 
 from app.config import get_settings
 from app.database import create_db_and_tables
@@ -13,7 +13,6 @@ from app.api.routes import health, admin, gateway, auth
 import app.models  # Import models to ensure they're registered with SQLModel
 
 settings = get_settings()
-logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -21,7 +20,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan - startup and shutdown events"""
     # Startup
     await create_db_and_tables()
-    logger.info(f"API Gateway started on {settings.host}:{settings.port}")
+    logger.info("API Gateway started on {}:{}", settings.host, settings.port)
     yield
     
     # Shutdown

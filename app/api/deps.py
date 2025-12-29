@@ -7,6 +7,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel.ext.asyncio.session import AsyncSession
 import jwt
 from jwt.exceptions import PyJWTError
+from loguru import logger
 
 from app.database import get_session
 from app.models.partner import Partner
@@ -137,6 +138,13 @@ class AuthenticatedPartner:
         if self.check_service_access:
             service = get_service_from_path(request.url.path)
             if service and not partner.can_access_service(service):
+                logger.warning(
+                    "Access denied: Partner {} attempted '{}' service at {} but only has access to: {}",
+                    partner.id,
+                    service,
+                    request.url.path,
+                    partner.allowed_services
+                )
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
                     detail={
@@ -155,6 +163,13 @@ class AuthenticatedPartner:
         request.state.partner = partner
         
         if not allowed:
+            logger.warning(
+                "Rate limit exceeded: partner_id={} limit={} used={} path={}",
+                partner.id,
+                rate_info["limit"],
+                rate_info["used"],
+                request.url.path
+            )
             raise HTTPException(
                 status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                 detail={

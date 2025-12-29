@@ -6,6 +6,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from app.models.partner import Partner, PartnerCreate
 from app.models.permission import PartnerServicePermission
+from loguru import logger
 
 
 class PartnerService:
@@ -45,6 +46,7 @@ class PartnerService:
         
         await self.session.commit()
         
+        logger.info("Partner created: id={} name={} services={} rate_limit={}", partner.id, partner.name, len(partner_data.service_ids), partner.rate_limit)
         return partner, api_key
     
     async def get_partner_by_id(self, partner_id: int) -> Optional[Partner]:

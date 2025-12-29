@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel.ext.asyncio.session import AsyncSession
 import jwt
 from pydantic import BaseModel
+from loguru import logger
 
 from app.database import get_session
 from app.services.partner import PartnerService
@@ -84,6 +85,7 @@ async def get_token(
     partner = await partner_service.get_partner_by_api_key(token_request.api_key)
     
     if not partner:
+        logger.warning("Token request failed: invalid API key")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={
@@ -93,6 +95,7 @@ async def get_token(
         )
     
     if not partner.is_active:
+        logger.warning("Token request failed: partner deactivated id={}", partner.id)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={
@@ -112,6 +115,7 @@ async def get_token(
     }
     
     access_token = create_access_token(token_data)
+    logger.info("Access token issued: partner_id={} services={} rate_limit={}", partner.id, len(partner.allowed_services), partner.rate_limit)
     
     return TokenResponse(
         access_token=access_token,

@@ -6,6 +6,7 @@ from typing import Annotated
 import httpx
 from fastapi import APIRouter, Depends, Request, Response, HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
+from loguru import logger
 
 from app.database import get_session
 from app.models.partner import Partner
@@ -78,6 +79,15 @@ async def proxy_to_backend(
             "X-Backend-Response-Time": f"{int(backend_response.elapsed.total_seconds() * 1000)}ms"
         }
         
+        # Minimal slow-request log
+        if response_time_ms > 1000:
+            logger.warning(
+                "Slow proxy response: path={} status={} time_ms={}",
+                path,
+                backend_response.status_code,
+                int(response_time_ms)
+            )
+
         return Response(
             content=backend_response.content,
             status_code=backend_response.status_code,
@@ -85,8 +95,15 @@ async def proxy_to_backend(
             media_type=backend_response.headers.get("Content-Type", "application/json")
         )
         
-    except httpx.TimeoutException:
+    except httpx.TimeoutException as e:
         response_time_ms = (time.time() - start_time) * 1000
+        logger.error(
+            "Gateway timeout: path={} partner_id={} time_ms={} error={}",
+            path,
+            partner.id,
+            int(response_time_ms),
+            str(e)
+        )
         
         # Log the timeout
         logger_service = RequestLoggerService(session)
@@ -110,6 +127,13 @@ async def proxy_to_backend(
         
     except httpx.RequestError as e:
         response_time_ms = (time.time() - start_time) * 1000
+        logger.error(
+            "Backend request error: path={} partner_id={} error={} time_ms={}",
+            path,
+            partner.id,
+            str(e),
+            int(response_time_ms)
+        )
         
         # Log the error
         logger_service = RequestLoggerService(session)
