@@ -1,6 +1,6 @@
 # API Gateway - FastAPI + SQLModel + SQLite
 
-Production-ready API Gateway managing external partner access to internal services with authentication, rate limiting, and audit logging.
+API Gateway managing external partner access to internal services with authentication, rate limiting, and audit logging.
 
 ## Features
 
